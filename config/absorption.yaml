@@ -1,0 +1,270 @@
+# ===========================================================================
+# SpongeBot Absorption Engine Configuration
+# ===========================================================================
+# Controls how SpongeBot absorbs knowledge from external codebases.
+# Six absorption modes, each with distinct strategies and confidence
+# requirements. Evolutionary parameters govern skill mutation and
+# crossover for continuous improvement.
+# ===========================================================================
+
+absorption:
+  # Master enable/disable
+  enabled: true
+
+  # ---------------------------------------------------------------------------
+  # Absorption Modes
+  # ---------------------------------------------------------------------------
+  # Each mode represents a different strategy for extracting and
+  # integrating knowledge from external sources.
+  modes:
+    # Mode 1: Pattern Extraction
+    # Identify recurring code patterns, idioms, and conventions.
+    pattern_extraction:
+      enabled: true
+      description: "Extract recurring patterns, idioms, and conventions"
+      confidence_required: 0.30    # low bar - patterns are low risk
+      max_patterns_per_scan: 50
+      min_occurrences: 3           # pattern must appear N times to qualify
+      pattern_types:
+        - naming_conventions
+        - error_handling
+        - data_validation
+        - api_design
+        - control_flow
+        - configuration
+
+    # Mode 2: Architecture Absorption
+    # Learn module boundaries, dependency structures, layer patterns.
+    architecture:
+      enabled: true
+      description: "Learn module structure, layering, and dependency patterns"
+      confidence_required: 0.50    # medium bar - architecture is harder
+      analyze_depth: 3             # directory levels to analyze
+      detect:
+        - module_boundaries
+        - layer_separation
+        - dependency_direction
+        - interface_patterns
+        - plugin_architecture
+
+    # Mode 3: API Mining
+    # Extract interface contracts, parameter patterns, response shapes.
+    api_mining:
+      enabled: true
+      description: "Extract interface contracts, parameter patterns, response shapes"
+      confidence_required: 0.40
+      sources:
+        - function_signatures
+        - class_interfaces
+        - rest_endpoints
+        - protocol_definitions
+        - type_definitions
+      include_docstrings: true
+      include_type_hints: true
+
+    # Mode 4: Test Absorption
+    # Learn testing patterns, assertion styles, fixture strategies.
+    test_absorption:
+      enabled: true
+      description: "Learn testing patterns, assertion styles, coverage strategies"
+      confidence_required: 0.35
+      test_frameworks:
+        - pytest
+        - unittest
+        - jest
+        - mocha
+      extract:
+        - fixture_patterns
+        - assertion_styles
+        - mock_strategies
+        - parameterization
+        - coverage_patterns
+
+    # Mode 5: Documentation Mining
+    # Extract knowledge from docstrings, comments, README files.
+    documentation:
+      enabled: true
+      description: "Extract knowledge from docstrings, comments, and docs"
+      confidence_required: 0.25    # low bar - docs are informational
+      sources:
+        - docstrings
+        - inline_comments
+        - readme_files
+        - changelog
+        - type_stubs
+      extract:
+        - usage_examples
+        - design_rationale
+        - known_limitations
+        - configuration_docs
+
+    # Mode 6: Behavioral Cloning
+    # Replay execution traces to learn decision-making patterns.
+    behavioral_cloning:
+      enabled: true
+      description: "Learn decision patterns from execution traces and git history"
+      confidence_required: 0.60    # high bar - behavioral patterns are complex
+      sources:
+        - git_history
+        - execution_traces
+        - debug_logs
+        - refactoring_diffs
+      max_history_depth: 100       # max git commits to analyze
+      extract:
+        - refactoring_patterns
+        - bug_fix_patterns
+        - feature_evolution
+        - decision_sequences
+
+  # ---------------------------------------------------------------------------
+  # Confidence Levels
+  # ---------------------------------------------------------------------------
+  # Global confidence settings for absorbed knowledge.
+  confidence:
+    # Initial confidence for newly absorbed knowledge
+    initial: 0.30
+
+    # Confidence boost when absorbed knowledge is validated
+    validation_boost: 0.15
+
+    # Confidence penalty when absorbed knowledge fails in practice
+    failure_penalty: 0.20
+
+    # Minimum confidence to integrate into the skill graph
+    integration_threshold: 0.40
+
+    # Minimum confidence to use in production (unsupervised)
+    production_threshold: 0.70
+
+    # Confidence ceiling for absorbed knowledge (never reaches 1.0)
+    # Full mastery requires independent validation beyond absorption
+    ceiling: 0.85
+
+  # ---------------------------------------------------------------------------
+  # Evolutionary Parameters
+  # ---------------------------------------------------------------------------
+  # Govern how absorbed skills evolve over time through mutation,
+  # crossover, and selection pressure.
+  evolution:
+    # Enable evolutionary optimization of skills
+    enabled: true
+
+    # --- Mutation ---
+    mutation:
+      # Probability of a skill mutating during evolution cycle
+      rate: 0.05
+
+      # Maximum parameter change per mutation (fraction of current value)
+      max_delta: 0.20
+
+      # Types of mutations allowed
+      types:
+        - parameter_tweak       # adjust numeric parameters
+        - step_reorder          # reorder non-dependent steps
+        - step_elimination      # remove redundant steps
+        - step_substitution     # swap equivalent operations
+
+    # --- Crossover ---
+    crossover:
+      # Probability of crossover between two compatible skills
+      rate: 0.10
+
+      # Minimum similarity for skills to be crossover-compatible
+      compatibility_threshold: 0.60
+
+      # Crossover strategies
+      strategies:
+        - single_point          # swap at one point
+        - uniform               # swap each step independently
+
+    # --- Selection ---
+    selection:
+      # Selection pressure: higher = more aggressive pruning of weak variants
+      pressure: 0.7
+
+      # Tournament size for selection (skills compete in groups)
+      tournament_size: 3
+
+      # Elitism: top N skills always survive selection
+      elite_count: 2
+
+      # Fitness function weights
+      fitness_weights:
+        success_rate: 0.40
+        token_efficiency: 0.25
+        execution_speed: 0.20
+        generalization: 0.15
+
+    # --- Evolution Cycle ---
+    cycle:
+      # How often to run evolution (executions between cycles)
+      interval_executions: 50
+
+      # Maximum variants per skill
+      max_variants: 5
+
+      # Variant evaluation period (executions before selection)
+      evaluation_period: 10
+
+  # ---------------------------------------------------------------------------
+  # Source Management
+  # ---------------------------------------------------------------------------
+  sources:
+    # Track which codebases have been absorbed
+    tracking: true
+
+    # Path to source registry
+    registry_path: "data/absorption_sources.json"
+
+    # Re-absorption cooldown (hours) to avoid redundant processing
+    cooldown_hours: 24
+
+    # Maximum source size (MB) to prevent memory issues
+    max_source_size_mb: 100
+
+    # File extensions to include in absorption scans
+    include_extensions:
+      - ".py"
+      - ".js"
+      - ".ts"
+      - ".jsx"
+      - ".tsx"
+      - ".go"
+      - ".rs"
+      - ".java"
+
+    # Directories to skip during absorption
+    exclude_dirs:
+      - node_modules
+      - __pycache__
+      - .git
+      - .venv
+      - venv
+      - dist
+      - build
+      - .tox
+
+  # ---------------------------------------------------------------------------
+  # Safety Rails
+  # ---------------------------------------------------------------------------
+  safety:
+    # Never absorb secrets, credentials, or sensitive data
+    redact_secrets: true
+
+    # Patterns that indicate sensitive content (skip these files)
+    sensitive_patterns:
+      - "password"
+      - "secret"
+      - "api_key"
+      - "private_key"
+      - "token"
+      - "credential"
+
+    # Require human approval for high-confidence absorption
+    approval_threshold: 0.80
+
+    # Sandbox absorbed skills before production use
+    sandbox_first: true
+
+    # Maximum skills absorbed per session
+    max_absorptions_per_session: 20

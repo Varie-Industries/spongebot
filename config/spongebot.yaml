@@ -1,0 +1,195 @@
+# ===========================================================================
+# SpongeBot Main Configuration
+# ===========================================================================
+# This file configures the core SpongeBot system. Values here serve as
+# defaults and can be overridden per-environment or via env vars.
+#
+# Subsystem configs live in their own files:
+#   - skills.yaml      Skill DAG and learning graph
+#   - absorption.yaml  Absorption engine modes and thresholds
+#   - lockdown.yaml    Anthropic enforcement and security rules
+#   - branding.yaml    Personality, theme, and Buu quotes
+# ===========================================================================
+
+spongebot:
+  # Display name used in logs, CLI banners, and agent identity
+  name: "SpongeBot"
+
+  # Logging level: DEBUG | INFO | WARNING | ERROR | CRITICAL
+  log_level: "INFO"
+
+  # Root directory for persistent data (ledgers, memory DBs, caches)
+  data_dir: "data"
+
+  # Maximum concurrent agent tasks (0 = unlimited)
+  max_concurrent_tasks: 8
+
+  # Heartbeat interval for health checks (seconds)
+  heartbeat_interval: 30
+
+
+# ---------------------------------------------------------------------------
+# LLM Provider Configuration
+# ---------------------------------------------------------------------------
+llm:
+  # Provider: anthropic (enforced by lockdown unless overridden)
+  provider: "anthropic"
+
+  # Model ID for primary inference
+  model: "claude-sonnet-4-20250514"
+
+  # Max output tokens per response
+  max_tokens: 2048
+
+  # Sampling temperature (0.0 = deterministic, 1.0 = creative)
+  temperature: 0.7
+
+  # API key (prefer env var ANTHROPIC_API_KEY over this field)
+  api_key: ""
+
+  # Retry config for transient API errors
+  retry:
+    max_retries: 3
+    base_delay_seconds: 1.0
+    max_delay_seconds: 30.0
+    backoff_factor: 2.0
+
+  # Streaming: enable token-by-token streaming responses
+  streaming: true
+
+
+# ---------------------------------------------------------------------------
+# Token Saver (7-Layer Optimization Pipeline)
+# ---------------------------------------------------------------------------
+token_saver:
+  # Master enable/disable for the entire pipeline
+  enabled: true
+
+  # L1: System prompt compression
+  prompt_compression: true
+
+  # L2: Response cache
+  response_cache:
+    enabled: true
+    max_entries: 500
+    ttl_seconds: 300           # 5 minutes
+
+  # L3: Agentic plan cache
+  plan_cache:
+    enabled: true
+    max_entries: 200
+    ttl_seconds: 600           # 10 minutes
+
+  # L4: KV cache compression
+  kv_compression:
+    enabled: true
+    level: 6                   # zlib 1-9, 6 = balanced
+
+  # L5: Skill distillation
+  skill_distillation:
+    enabled: true
+
+  # L6: Semantic cache
+  semantic_cache:
+    enabled: true
+    threshold: 0.92            # cosine similarity threshold
+    model: "all-MiniLM-L6-v2"  # sentence-transformers model
+    max_entries: 500
+    ttl_seconds: 600
+
+  # L7: Conversation window management
+  conversation_window:
+    enabled: true
+    window_size: 20            # max turns to keep
+    recent_verbatim: 6         # recent turns kept word-for-word
+
+  # Cost tracking and budget enforcement
+  cost_tracker:
+    session_budget_usd: 2.00
+    hourly_budget_usd: 5.00
+    ledger_file: "token_saver_ledger.json"
+
+
+# ---------------------------------------------------------------------------
+# Memory Subsystem
+# ---------------------------------------------------------------------------
+memory:
+  # Backend: in_memory | chromadb | sqlite
+  backend: "in_memory"
+
+  # Path for persistent memory database
+  db_path: "data/memory"
+
+  # Maximum memory entries before eviction
+  max_entries: 10_000
+
+  # Embedding model for semantic memory search
+  embedding_model: "all-MiniLM-L6-v2"
+
+  # Memory tiers with decay rates (days until half-relevance)
+  tiers:
+    episodic:
+      decay_days: 7
+      max_entries: 5000
+    semantic:
+      decay_days: null         # permanent
+      max_entries: 3000
+    procedural:
+      decay_days: 30
+      max_entries: 2000
+
+
+# ---------------------------------------------------------------------------
+# Security
+# ---------------------------------------------------------------------------
+security:
+  # Fernet encryption key for data at rest (auto-generated if empty)
+  encryption_key: ""
+
+  # Enable tamper-evident audit logging
+  audit_logging: true
+
+  # Audit log file
+  audit_log_path: "data/audit.log"
+
+  # Maximum input length accepted (chars)
+  max_input_length: 10_000
+
+
+# ---------------------------------------------------------------------------
+# Agent System
+# ---------------------------------------------------------------------------
+agents:
+  # Maximum agents that can be spawned simultaneously
+  max_agents: 12
+
+  # Default timeout for agent tasks (seconds)
+  default_timeout: 120
+
+  # Enable inter-agent communication via shared memory
+  shared_memory: true
+
+  # Agent types available for spawning
+  types:
+    - researcher
+    - coder
+    - reviewer
+    - tester
+    - planner
+
+
+# ---------------------------------------------------------------------------
+# CLI Configuration
+# ---------------------------------------------------------------------------
+cli:
+  # Enable colored output
+  colors: true
+
+  # Show splash screen on startup
+  splash_screen: true
+
+  # History file for command recall
+  history_file: "data/cli_history"
+
+  # Maximum history entries
+  max_history: 1000

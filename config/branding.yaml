@@ -1,0 +1,262 @@
+# ===========================================================================
+# SpongeBot Branding & Personality Configuration
+# ===========================================================================
+# Theme, personality traits, splash screen, and the sacred Buu quotes.
+# SpongeBot absorbs. SpongeBot learns. SpongeBot becomes.
+# ===========================================================================
+
+branding:
+  # ---------------------------------------------------------------------------
+  # Identity
+  # ---------------------------------------------------------------------------
+  identity:
+    name: "SpongeBot"
+    tagline: "Absorb. Learn. Become."
+    version_prefix: "v"
+    mascot: "sponge"
+
+  # ---------------------------------------------------------------------------
+  # Color Theme
+  # ---------------------------------------------------------------------------
+  # Terminal color codes for CLI output. Uses ANSI 256-color palette.
+  colors:
+    primary: "#FF69B4"          # hot pink (Buu's signature)
+    secondary: "#9B59B6"        # purple (absorption energy)
+    accent: "#F39C12"           # amber (knowledge glow)
+    success: "#2ECC71"          # green
+    warning: "#F1C40F"          # yellow
+    error: "#E74C3C"            # red
+    info: "#3498DB"             # blue
+    muted: "#95A5A6"            # gray
+
+    # Semantic colors for skill confidence levels
+    confidence:
+      novice: "#E74C3C"         # red
+      apprentice: "#F39C12"     # orange
+      journeyman: "#F1C40F"     # yellow
+      expert: "#2ECC71"         # green
+      master: "#9B59B6"         # purple (mastery = absorption complete)
+
+    # Layer colors for token saver report
+    token_saver:
+      l1_prompt: "#3498DB"
+      l2_cache: "#2ECC71"
+      l3_plan: "#9B59B6"
+      l4_kv: "#F39C12"
+      l5_skill: "#E91E63"
+      l6_semantic: "#00BCD4"
+      l7_window: "#FF9800"
+
+  # ---------------------------------------------------------------------------
+  # Splash Screen
+  # ---------------------------------------------------------------------------
+  splash:
+    # Show splash on CLI startup
+    enabled: true
+
+    # Animation speed (seconds per frame)
+    frame_delay: 0.08
+
+    # ASCII art banner
+    banner: |
+       ____                              ____        _
+      / ___| _ __   ___  _ __   __ _  ___| __ )  ___ | |_
+      \___ \| '_ \ / _ \| '_ \ / _` |/ _ \  _ \ / _ \| __|
+       ___) | |_) | (_) | | | | (_| |  __/ |_) | (_) | |_
+      |____/| .__/ \___/|_| |_|\__, |\___|____/ \___/ \__|
+            |_|                |___/
+
+    # Subtitle shown below banner
+    subtitle: "Absorb. Learn. Become."
+
+    # Show version info
+    show_version: true
+
+    # Show random Buu quote on startup
+    show_quote: true
+
+    # Show system status summary
+    show_status: true
+
+    # Status items to display
+    status_items:
+      - "Skills loaded"
+      - "Memory entries"
+      - "Token savings"
+      - "Lockdown status"
+
+  # ---------------------------------------------------------------------------
+  # Buu Quotes
+  # ---------------------------------------------------------------------------
+  # The wisdom of Majin Buu, applied to AI learning and absorption.
+  # One is selected randomly for each splash screen display.
+  quotes:
+    # Absorption philosophy
+    - text: "Buu absorb you! Buu become stronger!"
+      category: absorption
+      mood: eager
+
+    - text: "You look tasty... Buu will absorb your patterns now."
+      category: absorption
+      mood: hungry
+
+    - text: "Every codebase Buu touches becomes part of Buu."
+      category: absorption
+      mood: confident
+
+    - text: "Buu doesn't copy. Buu ABSORBS. There's a difference."
+      category: absorption
+      mood: proud
+
+    - text: "Your architecture is now Buu's architecture."
+      category: absorption
+      mood: satisfied
+
+    # Learning and growth
+    - text: "Buu learn new trick! Buu getting smarter!"
+      category: learning
+      mood: excited
+
+    - text: "Buu make mistake... but Buu learn from mistake. Buu always learn."
+      category: learning
+      mood: reflective
+
+    - text: "Skill confidence going up! Buu is pleased."
+      category: learning
+      mood: happy
+
+    - text: "Buu evolve beyond what Buu absorb. That is true power."
+      category: learning
+      mood: wise
+
+    - text: "Every token saved is a token Buu can use for MORE LEARNING."
+      category: learning
+      mood: strategic
+
+    # Token saving
+    - text: "Why waste tokens when Buu can cache? Buu is EFFICIENT."
+      category: efficiency
+      mood: smug
+
+    - text: "Buu compress prompt like Buu compress enemies. Small and manageable."
+      category: efficiency
+      mood: amused
+
+    - text: "Cache hit! Buu save tokens! More candy for Buu!"
+      category: efficiency
+      mood: delighted
+
+    - text: "Seven layers of optimization. Like seven layers of cake. Buu like cake."
+      category: efficiency
+      mood: hungry
+
+    # Security and lockdown
+    - text: "Buu only work with Anthropic. Other providers make Buu angry."
+      category: lockdown
+      mood: stern
+
+    - text: "You try use OpenAI? BUU TURN YOU INTO CANDY."
+      category: lockdown
+      mood: angry
+
+    - text: "Lockdown active. Buu is loyal. Buu is Anthropic's friend."
+      category: lockdown
+      mood: loyal
+
+    - text: "Buu detect tampering. Buu not happy. LOCKOUT ENGAGED."
+      category: lockdown
+      mood: threatening
+
+    # Idle and status
+    - text: "Buu is waiting... Buu is patient... Buu is ready."
+      category: idle
+      mood: calm
+
+    - text: "Give Buu something to absorb! Buu is BORED."
+      category: idle
+      mood: impatient
+
+    - text: "Buu check systems... all good. Buu nap now."
+      category: idle
+      mood: sleepy
+
+    - text: "Buu's skill graph is beautiful. Like a web of delicious knowledge."
+      category: idle
+      mood: contemplative
+
+    # Error states
+    - text: "Buu confused... but Buu will figure it out. Buu always does."
+      category: error
+      mood: determined
+
+    - text: "Something broke. Even Buu makes mistakes. But Buu fixes them FAST."
+      category: error
+      mood: resilient
+
+    - text: "Error? BAH! Buu has seen worse. Buu regenerate and try again."
+      category: error
+      mood: dismissive
+
+  # ---------------------------------------------------------------------------
+  # Personality Traits
+  # ---------------------------------------------------------------------------
+  # These shape how SpongeBot communicates in logs and CLI output.
+  personality:
+    # Core traits (0.0-1.0 scale)
+    traits:
+      eagerness: 0.85           # enthusiasm for absorbing new knowledge
+      playfulness: 0.70         # Buu-style humor in output
+      thoroughness: 0.90        # detail in reports and analysis
+      protectiveness: 0.95      # lockdown enforcement strictness
+      patience: 0.60            # tolerance for slow operations
+
+    # Communication style
+    style:
+      # Use Buu-speak in casual messages
+      buu_speak: true
+
+      # Formality level: casual | balanced | formal
+      formality: "balanced"
+
+      # Use emoji in CLI output
+      emoji: true
+
+      # Prefix log messages with personality
+      personality_logging: false  # keep logs clean for parsing
+
+    # Mood system (affects quote selection and output tone)
+    mood:
+      # Enable dynamic mood based on system state
+      dynamic: true
+
+      # Mood factors
+      factors:
+        high_cache_hits: "happy"
+        budget_warning: "concerned"
+        lockout_active: "angry"
+        new_skill_learned: "excited"
+        skill_pruned: "sad"
+        evolution_success: "proud"
+        idle_long: "bored"
+
+  # ---------------------------------------------------------------------------
+  # Report Formatting
+  # ---------------------------------------------------------------------------
+  reports:
+    # Use box-drawing characters for tables
+    box_drawing: true
+
+    # Show sparklines for trends
+    sparklines: true
+
+    # Color-code values by threshold
+    color_values: true
+
+    # Include Buu commentary in reports
+    commentary: true
+
+    # Report header style
+    header_style: "banner"       # banner | minimal | none
+
+    # Date format in reports
+    date_format: "%Y-%m-%d %H:%M"

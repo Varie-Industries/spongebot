@@ -1,0 +1,236 @@
+# ===========================================================================
+# SpongeBot Skill DAG Configuration
+# ===========================================================================
+# Defines the skill graph structure: how skills are organized, connected,
+# and pruned over time. Skills form a directed acyclic graph (DAG) where
+# edges represent dependencies, prerequisites, and evolution paths.
+# ===========================================================================
+
+skill_graph:
+  # ---------------------------------------------------------------------------
+  # Node Types
+  # ---------------------------------------------------------------------------
+  # Each skill node has a type that determines its behavior in the graph.
+  node_types:
+    primitive:
+      description: "Atomic, indivisible skill unit (e.g., 'read_file')"
+      max_complexity: 1.0
+      can_decompose: false
+      color: "#4CAF50"        # green
+
+    composite:
+      description: "Skill composed of multiple primitives (e.g., 'refactor_module')"
+      max_complexity: 5.0
+      can_decompose: true
+      min_children: 2
+      color: "#2196F3"        # blue
+
+    meta:
+      description: "Strategy/pattern skill that orchestrates others (e.g., 'tdd_workflow')"
+      max_complexity: 10.0
+      can_decompose: true
+      requires_primitives: true
+      color: "#9C27B0"        # purple
+
+    absorbed:
+      description: "Skill learned from an external codebase via absorption"
+      max_complexity: 8.0
+      can_decompose: true
+      source_tracking: true   # track where it was absorbed from
+      color: "#FF9800"        # orange
+
+    evolved:
+      description: "Skill that mutated from an existing skill via evolution"
+      max_complexity: 10.0
+      can_decompose: true
+      parent_tracking: true   # track the parent skill
+      color: "#E91E63"        # pink
+
+  # ---------------------------------------------------------------------------
+  # Edge Types
+  # ---------------------------------------------------------------------------
+  # Edges define relationships between skills in the DAG.
+  edge_types:
+    depends_on:
+      description: "Hard dependency: child must be mastered before parent"
+      weight: 1.0
+      transitive: true
+
+    enhances:
+      description: "Soft dependency: child improves parent performance"
+      weight: 0.5
+      transitive: false
+
+    evolved_from:
+      description: "Evolutionary lineage: parent mutated into child"
+      weight: 0.3
+      transitive: true
+
+    absorbed_from:
+      description: "Absorption lineage: skill extracted from external source"
+      weight: 0.2
+      transitive: false
+
+    conflicts_with:
+      description: "Mutual exclusion: skills that cannot both be active"
+      weight: -1.0
+      transitive: false
+
+    composes:
+      description: "Composition: child is a component of parent composite"
+      weight: 0.8
+      transitive: false
+
+  # ---------------------------------------------------------------------------
+  # Confidence Scoring
+  # ---------------------------------------------------------------------------
+  confidence:
+    # Initial confidence when a new skill is created
+    initial: 0.3
+
+    # Confidence boost per successful execution
+    success_increment: 0.05
+
+    # Confidence penalty per failed execution
+    failure_decrement: 0.10
+
+    # Maximum confidence (1.0 = fully mastered)
+    max: 1.0
+
+    # Minimum confidence before pruning consideration
+    prune_threshold: 0.15
+
+    # Confidence levels and their labels
+    levels:
+      novice:
+        range: [0.0, 0.25]
+        label: "Novice"
+        permissions: ["execute_supervised"]
+
+      apprentice:
+        range: [0.25, 0.50]
+        label: "Apprentice"
+        permissions: ["execute_supervised", "suggest"]
+
+      journeyman:
+        range: [0.50, 0.75]
+        label: "Journeyman"
+        permissions: ["execute_supervised", "suggest", "execute_unsupervised"]
+
+      expert:
+        range: [0.75, 0.90]
+        label: "Expert"
+        permissions: ["execute_supervised", "suggest", "execute_unsupervised", "teach"]
+
+      master:
+        range: [0.90, 1.00]
+        label: "Master"
+        permissions: ["execute_supervised", "suggest", "execute_unsupervised", "teach", "evolve"]
+
+  # ---------------------------------------------------------------------------
+  # Confidence Decay
+  # ---------------------------------------------------------------------------
+  # Skills lose confidence over time if not practiced. This prevents
+  # stale skills from being used without re-validation.
+  decay:
+    # Enable time-based confidence decay
+    enabled: true
+
+    # Decay function: linear | exponential | step
+    function: "exponential"
+
+    # Half-life in days (confidence halves after this many days without use)
+    half_life_days: 30
+
+    # Minimum confidence floor (decay stops here)
+    floor: 0.10
+
+    # Decay check interval (seconds)
+    check_interval: 3600       # every hour
+
+    # Skills exempt from decay (by node type)
+    exempt_types:
+      - primitive              # primitives don't decay
+
+  # ---------------------------------------------------------------------------
+  # Pruning
+  # ---------------------------------------------------------------------------
+  # Removes low-confidence skills to keep the graph lean and relevant.
+  pruning:
+    # Enable automatic pruning
+    enabled: true
+
+    # Prune skills below this confidence after grace period
+    threshold: 0.15
+
+    # Grace period before a low-confidence skill is pruned (days)
+    grace_period_days: 14
+
+    # Maximum total skills in the graph
+    max_skills: 500
+
+    # When over max_skills, prune lowest-confidence first
+    overflow_strategy: "lowest_confidence"
+
+    # Never prune these node types
+    protected_types:
+      - primitive
+
+    # Archive pruned skills (for potential recovery) vs delete
+    archive: true
+    archive_path: "data/pruned_skills"
+
+    # Pruning schedule (cron-like)
+    schedule: "daily"
+
+  # ---------------------------------------------------------------------------
+  # Graph Constraints
+  # ---------------------------------------------------------------------------
+  constraints:
+    # Maximum depth of the DAG (prevents infinite nesting)
+    max_depth: 10
+
+    # Maximum fan-out per node (prevents overly broad skills)
+    max_children: 15
+
+    # Maximum fan-in per node (prevents too many dependencies)
+    max_parents: 8
+
+    # Cycle detection: always enabled (it is a DAG after all)
+    cycle_detection: true
+
+    # Orphan cleanup: remove nodes with no edges after N days
+    orphan_cleanup_days: 7
+
+  # ---------------------------------------------------------------------------
+  # Skill Execution
+  # ---------------------------------------------------------------------------
+  execution:
+    # Maximum retry attempts for a failed skill execution
+    max_retries: 2
+
+    # Timeout per skill execution (seconds)
+    timeout: 60
+
+    # Record execution traces for learning
+    trace_recording: true
+
+    # Trace retention (days)
+    trace_retention_days: 7
+
+    # Minimum confidence to execute without supervision
+    unsupervised_threshold: 0.50
+
+  # ---------------------------------------------------------------------------
+  # Persistence
+  # ---------------------------------------------------------------------------
+  persistence:
+    # File path for the skill graph
+    path: "data/skill_graph.json"
+
+    # Auto-save interval (seconds, 0 = save on every change)
+    auto_save_interval: 60
+
+    # Backup before destructive operations
+    backup_on_prune: true
+    backup_path: "data/skill_graph_backups"
