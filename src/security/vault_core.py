@@ -408,8 +408,14 @@ class VaultCore:
             Path(config.get("core", {}).get("data_dir", "data")) / "security"
         )
         vault_password = sec_cfg.get("vault_password", "") or os.environ.get(
-            "SPONGEBOT_VAULT_PASSWORD", "changeme"
+            "SPONGEBOT_VAULT_PASSWORD", ""
         )
+        if not vault_password:
+            raise VaultError(
+                "No vault password configured. Set the SPONGEBOT_VAULT_PASSWORD "
+                "environment variable or 'security.vault_password' in config. "
+                "Refusing to derive a key from a default password."
+            )
         pbkdf2_iterations = sec_cfg.get(
             "pbkdf2_iterations", cls._PBKDF2_ITERATIONS_DEFAULT
         )
