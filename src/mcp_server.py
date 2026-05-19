@@ -12,7 +12,6 @@ Tools:
     sponge_add_skill — Add a new skill to the DAG
     sponge_boost     — Strengthen a skill's confidence
     sponge_health    — Show subsystem status
-    sponge_lockdown  — Verify Claude-only lockdown
 
 Registration:
     Claude Code:    claude mcp add spongebot python3 /path/to/mcp_server.py
@@ -39,9 +38,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.memory.hybrid_memory import HybridMemory
 from src.skills.dag import SkillDAG, SkillNode
 from src.learning.engine import LearningEngine
-from src.lockdown.anthropic_gate import AnthropicGate
-from src.lockdown.model_verifier import ModelVerifier
-from src.lockdown.environment_scanner import EnvironmentScanner
 
 logger = logging.getLogger("spongebot.mcp")
 
@@ -85,11 +81,17 @@ class SpongeBotMCP:
             return [
                 Tool(
                     name="sponge_absorb",
-                    description="Feed SpongeBot text, code, or documentation to learn from. It stores the knowledge and can recall it later.",
+                    description="Feed SpongeBot text, code, or documentation to learn from. Stored in the keyword-recall memory with a mode tag.",
                     inputSchema={
                         "type": "object",
                         "properties": {
                             "text": {"type": "string", "description": "The text/code/documentation to absorb"},
+                            "mode": {
+                                "type": "string",
+                                "description": "Absorption mode tag. One of: document, agent, experience, failure, evolutionary, federated.",
+                                "enum": ["document", "agent", "experience", "failure", "evolutionary", "federated"],
+                                "default": "document",
+                            },
                             "collection": {"type": "string", "description": "Category: knowledge, skills, or experiences", "default": "knowledge"},
                             "source": {"type": "string", "description": "Where this came from (file path, URL, etc.)", "default": ""},
                         },
@@ -152,16 +154,6 @@ class SpongeBotMCP:
                     description="Show SpongeBot's subsystem health status — memory, skills, learning engine.",
                     inputSchema={"type": "object", "properties": {}},
                 ),
-                Tool(
-                    name="sponge_lockdown",
-                    description="Verify SpongeBot's 9-layer Claude-only lockdown. Tests API key gate, model verifier, and environment scanner.",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "test_model": {"type": "string", "description": "Model ID to test against lockdown", "default": "claude-opus-4-6"},
-                        },
-                    },
-                ),
             ]
 
         @self.server.call_tool()
@@ -180,8 +172,6 @@ class SpongeBotMCP:
                     return await self._boost(arguments)
                 elif name == "sponge_health":
                     return await self._health(arguments)
-                elif name == "sponge_lockdown":
-                    return await self._lockdown(arguments)
                 else:
                     return [TextContent(type="text", text=f"Unknown tool: {name}")]
             except Exception as e:
@@ -191,12 +181,15 @@ class SpongeBotMCP:
 
     async def _absorb(self, args: dict) -> list[TextContent]:
         text = args["text"]
+        mode = args.get("mode", "document")
         collection = args.get("collection", "knowledge")
         source = args.get("source", "")
-        meta = {"source": source} if source else {}
+        meta: dict[str, str] = {"mode": mode}
+        if source:
+            meta["source"] = source
         doc_id = await self.memory.store(text, collection=collection, metadata=meta)
-        await self.learner.update({"type": "absorb", "success": True})
-        return [TextContent(type="text", text=f"Absorbed into '{collection}' (id: {doc_id}). {len(text)} chars stored. SpongeBot remembers.")]
+        await self.learner.update({"type": "absorb", "mode": mode, "success": True})
+        return [TextContent(type="text", text=f"Absorbed (mode={mode}, collection={collection}, id={doc_id}). {len(text)} chars stored.")]
 
     async def _recall(self, args: dict) -> list[TextContent]:
         query = args["query"]
@@ -258,40 +251,12 @@ class SpongeBotMCP:
         dag_stats = self.dag.stats()
         learn_stats = await self.learner.get_tier_stats()
         lines = [
-            "SpongeBot v0.2.0 Health Report",
+            "SpongeBot Health Report",
             "=" * 40,
             f"Memory: {mem_health['status']} | mode: {mem_health.get('mode', 'unknown')} | entries: {mem_health.get('text_entries', 0)}",
             f"Skills: {dag_stats['node_count']} skills | {dag_stats['edge_count']} edges | avg conf: {dag_stats['avg_confidence']:.2f}",
             f"Learning: {learn_stats.get('tier1', {}).get('count', 0)} tier-1 entries | 3-tier engine active",
-            f"Lockdown: 9-layer Anthropic enforcement active",
             f"Vault: AES-256 Fernet encryption available",
-        ]
-        return [TextContent(type="text", text="\n".join(lines))]
-
-    async def _lockdown(self, args: dict) -> list[TextContent]:
-        model = args.get("test_model", "claude-opus-4-6")
-        gate = AnthropicGate()
-        verifier = ModelVerifier()
-        scanner = EnvironmentScanner()
-
-        model_ok, model_msg = verifier.validate(model)
-        scanner.scan_now()
-        env_clean = not scanner.violation_detected
-
-        lines = [
-            "SpongeBot 9-Layer Lockdown Status",
-            "=" * 40,
-            f"Layer 1 - HW Fingerprint: active",
-            f"Layer 2 - API Key Gate: Anthropic keys only",
-            f"Layer 3 - Model Verifier: {model} → {'✓ APPROVED' if model_ok else '✗ BLOCKED: ' + model_msg}",
-            f"Layer 4 - Env Scanner: {'✓ Clean' if env_clean else '⚠ Threat detected: ' + scanner.violation_details}",
-            f"Layer 5 - Response Fingerprint: active",
-            f"Layer 6 - Crypto Binding: HMAC-SHA256",
-            f"Layer 7 - Tamper Detector: SHA-256 chain",
-            f"Layer 8 - Self-Destruct: armed (3 failed decrypts)",
-            f"Layer 9 - Lockout Manager: monitoring",
-            "",
-            "Status: Claude exclusive. No other AI permitted.",
         ]
         return [TextContent(type="text", text="\n".join(lines))]
 

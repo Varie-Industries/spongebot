@@ -101,7 +101,6 @@ def _repl_loop(verbose: bool = False) -> None:
         "absorb": "Absorb a new skill (usage: absorb <source>)",
         "cost": "Show token cost report",
         "vault": "Show vault status",
-        "lockdown": "Show lockdown layer status",
         "buu": "Summon Majin Buu",
         "quit": "Exit SpongeBot",
         "exit": "Exit SpongeBot",
@@ -142,8 +141,6 @@ def _repl_loop(verbose: bool = False) -> None:
             _show_cost_report()
         elif cmd == "vault":
             _show_vault_status()
-        elif cmd == "lockdown":
-            _show_lockdown_status()
         elif cmd == "buu":
             _show_buu()
         else:
@@ -196,8 +193,7 @@ def _show_status_table() -> None:
         ("Skill DAG", "running", "0 skills loaded"),
         ("Learning Tiers", "running", "5 tiers configured"),
         ("Token Saver", "running", "Compression active"),
-        ("Vault", "sealed", "Krabby Patty Formula secure"),
-        ("Lockdown Layer", "running", "Anthropic-only enforced"),
+        ("Vault", "sealed", "Vault encrypted"),
         ("Memory Store", "running", "SQLite backend ready"),
         ("Claude LLM", "unknown", "Awaiting API key"),
     ]
@@ -369,48 +365,6 @@ def _show_vault_status() -> None:
             title="[bold yellow]Vault[/bold yellow]",
             border_style="yellow",
         )
-    )
-
-
-# ---------------------------------------------------------------------------
-# lockdown
-# ---------------------------------------------------------------------------
-
-@cli.command()
-def lockdown() -> None:
-    """Show lockdown layer status."""
-    _show_lockdown_status()
-
-
-def _show_lockdown_status() -> None:
-    """Render lockdown layer status."""
-    table = Table(
-        title="Lockdown Layer Status",
-        border_style="red",
-        show_header=True,
-        header_style="bold red",
-        title_style="bold red",
-    )
-    table.add_column("Check", style="bold cyan", min_width=25)
-    table.add_column("Status", justify="center", min_width=10)
-
-    checks = [
-        ("Anthropic-Only Enforcement", "running"),
-        ("OpenAI Import Blocker", "running"),
-        ("Cohere Import Blocker", "running"),
-        ("Google AI Import Blocker", "running"),
-        ("HuggingFace Blocker", "running"),
-        ("Runtime AST Scanner", "running"),
-        ("Subprocess Guard", "running"),
-        ("Network Egress Filter", "running"),
-    ]
-    for name, stat in checks:
-        table.add_row(name, status_dot(stat))
-
-    console.print(table)
-    console.print(
-        f"[{STYLES['lockdown']}]LOCKDOWN ACTIVE: "
-        f"Only Anthropic Claude models permitted.[/{STYLES['lockdown']}]"
     )
 
 

@@ -13,7 +13,7 @@ COLORS = {
     "surface": "#16213E",       # Card backgrounds
     "success": "#00E676",       # Absorption complete
     "warning": "#FFB300",       # Budget warning
-    "error": "#FF1744",         # Lockdown violation
+    "error": "#FF1744",         # Error indicator
     "text": "#E0E0E0",          # Default text
     "text_dim": "#757575",      # Dimmed text
     "absorption": "#E040FB",    # Absorption in progress
@@ -39,7 +39,6 @@ STYLES = {
     "skill": "bold cyan",
     "skill_new": "bold bright_cyan",
     "skill_evolved": "bold bright_green",
-    "lockdown": "bold red on black",
     "vault": "bold yellow on black",
     "absorption": "bold magenta",
     "claude": "bold #D4A574",
@@ -67,7 +66,6 @@ RICH_THEME = Theme(
         "spongebot.info": "bold blue",
         "spongebot.buu": "bold magenta",
         "spongebot.skill": "bold cyan",
-        "spongebot.lockdown": "bold red",
         "spongebot.vault": "bold yellow",
         "spongebot.absorption": "bold magenta",
         "spongebot.claude": "bold #D4A574",

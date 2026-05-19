@@ -83,7 +83,7 @@ branding:
       - "Skills loaded"
       - "Memory entries"
       - "Token savings"
-      - "Lockdown status"
+      - "Vault status"
 
   # ---------------------------------------------------------------------------
   # Buu Quotes
@@ -150,23 +150,6 @@ branding:
       category: efficiency
       mood: hungry
 
-    # Security and lockdown
-    - text: "Buu only work with Anthropic. Other providers make Buu angry."
-      category: lockdown
-      mood: stern
-
-    - text: "You try use OpenAI? BUU TURN YOU INTO CANDY."
-      category: lockdown
-      mood: angry
-
-    - text: "Lockdown active. Buu is loyal. Buu is Anthropic's friend."
-      category: lockdown
-      mood: loyal
-
-    - text: "Buu detect tampering. Buu not happy. LOCKOUT ENGAGED."
-      category: lockdown
-      mood: threatening
-
     # Idle and status
     - text: "Buu is waiting... Buu is patient... Buu is ready."
       category: idle
@@ -207,7 +190,7 @@ branding:
       eagerness: 0.85           # enthusiasm for absorbing new knowledge
       playfulness: 0.70         # Buu-style humor in output
       thoroughness: 0.90        # detail in reports and analysis
-      protectiveness: 0.95      # lockdown enforcement strictness
+      protectiveness: 0.95      # caution with absorbed knowledge
       patience: 0.60            # tolerance for slow operations
 
     # Communication style

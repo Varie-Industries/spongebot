@@ -7,7 +7,6 @@
 # Subsystem configs live in their own files:
 #   - skills.yaml      Skill DAG and learning graph
 #   - absorption.yaml  Absorption engine modes and thresholds
-#   - lockdown.yaml    Anthropic enforcement and security rules
 #   - branding.yaml    Personality, theme, and Buu quotes
 # ===========================================================================
 
@@ -32,7 +31,7 @@ spongebot:
 # LLM Provider Configuration
 # ---------------------------------------------------------------------------
 llm:
-  # Provider: anthropic (enforced by lockdown unless overridden)
+  # Provider: anthropic (the only supported provider)
   provider: "anthropic"
 
   # Model ID for primary inference

@@ -1,4 +1,4 @@
-"""SpongeBot LLM Client -- Anthropic Claude ONLY, lockdown-validated."""
+"""SpongeBot LLM Client -- Anthropic Claude."""
 
 from __future__ import annotations
 

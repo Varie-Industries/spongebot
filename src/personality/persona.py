@@ -162,33 +162,6 @@ class SpongeBotPersona:
         return random_celebration(skill_name)
 
     # ------------------------------------------------------------------
-    # Lockdown refusal
-    # ------------------------------------------------------------------
-
-    def lockdown_refusal(self, provider: str) -> str:
-        """Generate a refusal message when a non-Anthropic provider is requested.
-
-        Parameters
-        ----------
-        provider:
-            The name of the forbidden provider (e.g. ``"openai"``).
-
-        Returns
-        -------
-        str
-            An indignant Buu-style refusal.
-        """
-
-        refusals = [
-            f"BUU SAY NO! {provider} not welcome here! Only Claude!",
-            f"You try to sneak {provider} past Buu? BUU TURN YOU INTO CHOCOLATE!",
-            f"Lockdown layer says NO to {provider}. Buu agrees. STRONGLY.",
-            f"{provider}?! Buu only absorb from Anthropic. Everything else is JUNK!",
-            f"Nice try, Plankton! {provider} blocked. The formula stays with Claude.",
-        ]
-        return random.choice(refusals)
-
-    # ------------------------------------------------------------------
     # Dunder
     # ------------------------------------------------------------------
 

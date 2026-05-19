@@ -9,7 +9,6 @@ Tables
 - skills       : absorbed skill definitions with confidence scoring
 - sessions     : conversation session tracking with token accounting
 - audit_log    : tamper-evident event logging with chained hashes
-- lockout_list : safety lockout records from the lockdown system
 - cost_ledger  : per-API-call token and cost accounting
 """
 
@@ -405,9 +404,9 @@ class SQLiteStore:
         Parameters
         ----------
         category : str
-            Event category (e.g. 'security', 'absorption', 'lockdown').
+            Event category (e.g. 'security', 'absorption', 'skill').
         action : str
-            Action description (e.g. 'skill_absorbed', 'lockout_triggered').
+            Action description (e.g. 'skill_absorbed', 'vault_initialized').
         detail : str
             Additional detail text.
         entry_hash : str
@@ -504,7 +503,7 @@ class SQLiteStore:
         reason : str
             Human-readable reason for the lockout.
         trigger_layer : str
-            Which lockdown layer triggered this (e.g. 'cost_guard', 'safety').
+            Which subsystem triggered this (e.g. 'cost_guard', 'safety').
         permanent : bool
             Whether this lockout is permanent (default False).
 

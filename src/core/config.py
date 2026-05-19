@@ -44,9 +44,6 @@ _PROFILE_OVERRIDES: dict[str, dict[str, Any]] = {
         "spongebot": {
             "log_level": "DEBUG",
         },
-        "lockdown": {
-            "enabled": False,
-        },
         "token_saver": {
             "cache_size": 100,
         },
@@ -60,10 +57,6 @@ _PROFILE_OVERRIDES: dict[str, dict[str, Any]] = {
     "prod": {
         "spongebot": {
             "log_level": "WARNING",
-        },
-        "lockdown": {
-            "enabled": True,
-            "scan_interval_seconds": 30,
         },
         "token_saver": {
             "cache_size": 2000,
@@ -82,9 +75,6 @@ _PROFILE_OVERRIDES: dict[str, dict[str, Any]] = {
     "ipad": {
         "spongebot": {
             "log_level": "INFO",
-        },
-        "lockdown": {
-            "enabled": True,
         },
         "llm": {
             "max_tokens": 2048,
@@ -112,24 +102,6 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "profile": "dev",
         "log_level": "INFO",
         "data_dir": "data",
-    },
-    "lockdown": {
-        "enabled": True,
-        "scan_interval_seconds": 60,
-        "max_decrypt_failures": 3,
-        "blocked_providers": [
-            "openai",
-            "google.generativeai",
-            "google.ai",
-            "mistralai",
-            "cohere",
-            "replicate",
-            "together",
-            "groq",
-            "fireworks",
-            "anyscale",
-            "deepseek",
-        ],
     },
     "llm": {
         "model": "claude-sonnet-4-20250514",
@@ -200,10 +172,6 @@ _ENV_VAR_MAP: list[tuple[str, str, str, type]] = [
     ("SPONGEBOT_PROFILE", "spongebot", "profile", str),
     ("SPONGEBOT_LOG_LEVEL", "spongebot", "log_level", str),
     ("SPONGEBOT_DATA_DIR", "spongebot", "data_dir", str),
-    # Lockdown
-    ("SPONGEBOT_LOCKDOWN_ENABLED", "lockdown", "enabled", bool),
-    ("SPONGEBOT_LOCKDOWN_SCAN_INTERVAL", "lockdown", "scan_interval_seconds", int),
-    ("SPONGEBOT_LOCKDOWN_MAX_FAILURES", "lockdown", "max_decrypt_failures", int),
     # LLM
     ("ANTHROPIC_API_KEY", "llm", "api_key", str),
     ("SPONGEBOT_LLM_MODEL", "llm", "model", str),

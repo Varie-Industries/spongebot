@@ -1,12 +1,12 @@
 """
 SpongeBot Tamper-Evident Audit Chain
 
-SHA-256 chained audit log absorbed from IT_NEXUS AuditEntry pattern.
-Each entry hashes prev_hash to form a tamper-evident chain. Any
-modification to a past entry breaks the chain and is detectable.
+SHA-256 chained audit log. Each entry hashes prev_hash to form a
+tamper-evident chain. Any modification to a past entry breaks the
+chain and is detectable.
 
-Tracks: lockdown checks, skill modifications, absorptions,
-federated exchanges, security events, and system operations.
+Tracks: skill modifications, absorptions, federated exchanges,
+security events, and system operations.
 """
 
 from __future__ import annotations
@@ -21,7 +21,6 @@ from typing import Literal
 
 # Valid audit categories
 AuditCategory = Literal[
-    "lockdown",
     "skill",
     "absorption",
     "federated",
@@ -30,7 +29,7 @@ AuditCategory = Literal[
 ]
 
 _VALID_CATEGORIES: frozenset[str] = frozenset(
-    ["lockdown", "skill", "absorption", "federated", "security", "system"]
+    ["skill", "absorption", "federated", "security", "system"]
 )
 
 _GENESIS_HASH = "GENESIS"
@@ -47,7 +46,7 @@ class AuditEntry:
     timestamp : float
         Unix timestamp when the entry was created.
     category : str
-        One of: lockdown, skill, absorption, federated, security, system.
+        One of: skill, absorption, federated, security, system.
     action : str
         Short verb or event name (e.g., "vault_initialized", "skill_added").
     detail : str
@@ -163,7 +162,7 @@ class AuditChain:
         Parameters
         ----------
         category : str
-            Event category. Must be one of: lockdown, skill, absorption,
+            Event category. Must be one of: skill, absorption,
             federated, security, system.
         action : str
             Short verb or event name.

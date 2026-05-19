@@ -1,22 +1,20 @@
 """
 SpongeBot Core Orchestrator -- The Brain.
 
-Wires together all subsystems (lockdown, security, memory, token_saver,
-absorption, skills, learning, llm) into a unified absorption pipeline.
+Wires together all subsystems (security, memory, token_saver, absorption,
+skills, learning, llm) into a unified absorption pipeline.
 
-Boot pattern absorbed from IT_NEXUS cortex.py: dependency-ordered startup
-with graceful fallback to stub implementations, timed boot steps, and
-reverse-order shutdown.
+Dependency-ordered startup with graceful fallback to stub implementations,
+timed boot steps, and reverse-order shutdown.
 
 Boot order:
-    1. lockdown     -- input validation / content filtering
-    2. security     -- encryption vault / audit trail
-    3. memory       -- vector store for recall
-    4. token_saver  -- response cache / prompt compression
-    5. absorption   -- pattern extraction from interactions
-    6. skills       -- skill DAG for capability routing
-    7. learning     -- tier progression engine
-    8. llm_client   -- Claude API interface
+    1. security     -- encryption vault / audit trail
+    2. memory       -- vector store for recall
+    3. token_saver  -- response cache / prompt compression
+    4. absorption   -- pattern extraction from interactions
+    5. skills       -- skill DAG for capability routing
+    6. learning     -- tier progression engine
+    7. llm_client   -- Claude API interface
 
 Usage:
     bot = SpongeBot()
@@ -88,26 +86,6 @@ class SubsystemStatus:
 # ---------------------------------------------------------------------------
 # Stub implementations -- used when real modules are not yet available
 # ---------------------------------------------------------------------------
-
-
-class _StubLockdown:
-    """Stub lockdown gate that permits everything."""
-
-    async def boot(self) -> None:
-        logger.info("  Lockdown (stub) ready")
-
-    async def shutdown(self) -> None:
-        pass
-
-    async def health_check(self) -> dict[str, Any]:
-        return {"status": "stub", "component": "lockdown"}
-
-    async def validate(self, user_input: str, **kwargs: Any) -> bool:
-        """Validate input. Stub always returns True."""
-        return True
-
-    def rejection_reason(self) -> Optional[str]:
-        return None
 
 
 class _StubSecurity:
@@ -313,7 +291,7 @@ def _import_subsystem(
     """Try importing a real subsystem module; fall back to stub.
 
     Args:
-        module_path: Dotted import path (e.g. ``src.lockdown.lockdown``).
+        module_path: Dotted import path (e.g. ``src.memory.store``).
         class_name: Class to import from the module.
         stub_factory: Callable that creates a stub instance (no args or config).
         config: The full configuration dict.
@@ -363,7 +341,6 @@ class SpongeBot:
 
     # Ordered subsystem definitions: (attr_name, step_label, module_path, class_name, stub)
     _BOOT_ORDER: list[tuple[str, str, str, str, type]] = [
-        ("_lockdown", "Lockdown", "src.lockdown.lockdown", "Lockdown", _StubLockdown),
         ("_security", "SecurityVault", "src.security.vault", "SecurityVault", _StubSecurity),
         ("_memory", "Memory", "src.memory.store", "MemoryStore", _StubMemory),
         ("_token_saver", "TokenSaver", "src.token_saver.saver", "TokenSaver", _StubTokenSaver),
@@ -378,7 +355,6 @@ class SpongeBot:
         self._config: dict[str, Any] = _deep_merge(DEFAULT_CONFIG, raw)
 
         # Subsystem references -- populated during boot
-        self._lockdown: Any = None
         self._security: Any = None
         self._memory: Any = None
         self._token_saver: Any = None
@@ -469,8 +445,10 @@ class SpongeBot:
                     try:
                         await fallback.boot()
                         status.booted = True
-                    except Exception:
-                        pass
+                    except Exception as boot_exc:
+                        logger.warning(
+                            "Stub %s boot failed: %s", label, boot_exc
+                        )
 
             self._statuses[label] = status
 
@@ -521,14 +499,13 @@ class SpongeBot:
         """Main absorption pipeline.
 
         Chains the full processing flow:
-            1. Lockdown: validate input safety
-            2. TokenSaver: check response cache
-            3. SkillDAG: find relevant skills
-            4. Memory: recall context
-            5. LLM: generate response with enriched prompt
-            6. Absorption: learn from the interaction
-            7. Learning: update progression tiers
-            8. TokenSaver: cache the response
+            1. TokenSaver: check response cache
+            2. SkillDAG: find relevant skills
+            3. Memory: recall context
+            4. LLM: generate response with enriched prompt
+            5. Absorption: learn from the interaction
+            6. Learning: update progression tiers
+            7. TokenSaver: cache the response
 
         Args:
             user_input: Raw user input text.
@@ -542,32 +519,7 @@ class SpongeBot:
 
         pipeline_start = time.monotonic()
 
-        # ------ 1. Lockdown validation ------
-        try:
-            is_valid = await self._lockdown.validate(user_input, session_id=session_id)
-            if not is_valid:
-                reason = (
-                    self._lockdown.rejection_reason()
-                    if hasattr(self._lockdown, "rejection_reason")
-                    else "blocked by content filter"
-                )
-                logger.warning(
-                    "Lockdown rejected input (session=%s): %s", session_id, reason
-                )
-                if hasattr(self._security, "audit_log"):
-                    self._security.audit_log(
-                        "lockdown_reject",
-                        session_id=session_id,
-                        reason=reason,
-                    )
-                return f"I can't process that request. Reason: {reason}"
-        except Exception as exc:
-            logger.error("Lockdown validation error: %s", exc)
-            # Fail open on stub, fail closed on real -- stubs always return True
-            # so an exception here from a real lockdown means block it.
-            return "An error occurred validating your input. Please try again."
-
-        # ------ 2. TokenSaver: check cache ------
+        # ------ 1. TokenSaver: check cache ------
         prompt_hash = hashlib.sha256(
             f"{session_id}:{user_input}".encode()
         ).hexdigest()[:16]
@@ -577,21 +529,21 @@ class SpongeBot:
             logger.debug("Cache hit for session=%s", session_id)
             return cached
 
-        # ------ 3. SkillDAG: find relevant skills ------
+        # ------ 2. SkillDAG: find relevant skills ------
         matched_skills: list[dict[str, Any]] = []
         try:
             matched_skills = await self._skills.find_skills(user_input)
         except Exception as exc:
             logger.warning("SkillDAG lookup failed: %s", exc)
 
-        # ------ 4. Memory: recall relevant context ------
+        # ------ 3. Memory: recall relevant context ------
         memories: list[dict[str, Any]] = []
         try:
             memories = await self._memory.recall(user_input, k=5)
         except Exception as exc:
             logger.warning("Memory recall failed: %s", exc)
 
-        # ------ 5. Build enriched prompt and call LLM ------
+        # ------ 4. Build enriched prompt and call LLM ------
         context_parts: list[str] = []
 
         if memories:
@@ -630,7 +582,7 @@ class SpongeBot:
                 "Please try again in a moment."
             )
 
-        # ------ 6. Absorption: learn from interaction ------
+        # ------ 5. Absorption: learn from interaction ------
         try:
             await self._absorption.absorb(
                 user_input=user_input,
@@ -645,7 +597,7 @@ class SpongeBot:
         except Exception as exc:
             logger.warning("Absorption failed: %s", exc)
 
-        # ------ 7. Learning: update tier progression ------
+        # ------ 6. Learning: update tier progression ------
         try:
             await self._learning.update(
                 interaction_result={
@@ -658,13 +610,13 @@ class SpongeBot:
         except Exception as exc:
             logger.warning("Learning update failed: %s", exc)
 
-        # ------ 8. TokenSaver: cache response ------
+        # ------ 7. TokenSaver: cache response ------
         try:
             self._token_saver.cache_response(prompt_hash, response)
         except Exception as exc:
             logger.warning("Response caching failed: %s", exc)
 
-        # ------ 9. Store in memory ------
+        # ------ 8. Store in memory ------
         try:
             await self._memory.store(
                 f"User: {user_input}\nAssistant: {response}",

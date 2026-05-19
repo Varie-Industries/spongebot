@@ -39,7 +39,6 @@ class TestLoadConfig:
         required_sections = [
             "spongebot",  # core section (named "spongebot" in config)
             "security",
-            "lockdown",
             "token_saver",
             "memory",
             "absorption",

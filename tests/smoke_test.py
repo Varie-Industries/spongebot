@@ -71,7 +71,7 @@ def test_config_system():
 
     # Verify all expected top-level keys exist
     expected_keys = [
-        "spongebot", "lockdown", "llm", "memory",
+        "spongebot", "llm", "memory",
         "absorption", "skills", "learning", "token_saver",
         "security", "api", "branding",
     ]
@@ -84,8 +84,6 @@ def test_config_system():
 
     # Verify nested values from DEFAULT_CONFIG are present
     assert cfg["llm"]["model"] is not None, "llm.model should exist"
-    assert cfg["lockdown"]["enabled"] is not None, "lockdown.enabled should exist"
-    assert isinstance(cfg["lockdown"]["blocked_providers"], list), "blocked_providers should be a list"
 
     record("1. Config System", True, f"All {len(expected_keys)} top-level keys present, singleton works")
 
@@ -126,9 +124,9 @@ def test_security_vault(tmp_path: Path):
     record("2b. Vault encrypt/decrypt (text)", True, "Text round-trip OK")
 
     # 2c. Store / retrieve secret
-    vault.store_secret("api_key", "sk-ant-api03-TESTKEY123")
+    vault.store_secret("api_key", "FAKE-API-KEY-FOR-VAULT-ROUNDTRIP-TEST")
     retrieved = vault.retrieve_secret("api_key")
-    assert retrieved == "sk-ant-api03-TESTKEY123", f"Secret mismatch: {retrieved!r}"
+    assert retrieved == "FAKE-API-KEY-FOR-VAULT-ROUNDTRIP-TEST", f"Secret mismatch: {retrieved!r}"
     record("2c. Vault store/retrieve secret", True, "Secret stored and retrieved")
 
     # 2d. Verify sentinel
@@ -149,7 +147,7 @@ def test_security_vault(tmp_path: Path):
         vault_password="smoke-test-password-42",
         pbkdf2_iterations=10_000,
     )
-    assert vault2.retrieve_secret("api_key") == "sk-ant-api03-TESTKEY123", "Persisted secret should survive re-open"
+    assert vault2.retrieve_secret("api_key") == "FAKE-API-KEY-FOR-VAULT-ROUNDTRIP-TEST", "Persisted secret should survive re-open"
     record("2f. Vault persistence across re-open", True, "Secrets persist on disk")
 
 
@@ -173,7 +171,7 @@ def test_audit_chain(tmp_path: Path):
     assert e2.sequence == 1, f"Second entry should be seq 1, got {e2.sequence}"
     assert e2.prev_hash == e1.entry_hash, "Second entry prev_hash should match first entry_hash"
 
-    e3 = chain.append("lockdown", "boot_complete", "All 9 layers green")
+    e3 = chain.append("system", "boot_complete", "Subsystems initialised")
     assert chain.length == 3, f"Chain should have 3 entries, got {chain.length}"
 
     record("3a. Audit chain append", True, f"{chain.length} entries added with correct linking")
@@ -198,62 +196,7 @@ def test_audit_chain(tmp_path: Path):
 
 
 # ---------------------------------------------------------------------------
-# 4. Lockdown Gate (individual layer testing, not full boot)
-# ---------------------------------------------------------------------------
-
-def test_lockdown_gate():
-    from src.lockdown.anthropic_gate import AnthropicGate
-    from src.lockdown.model_verifier import ModelVerifier
-
-    gate = AnthropicGate()
-    verifier = ModelVerifier()
-
-    # 4a. Valid Anthropic key accepted
-    ok, reason = gate.validate("sk-ant-api03-ABCDEF1234567890abcdef")
-    assert ok is True, f"Valid Anthropic key should pass: {reason}"
-    record("4a. Lockdown: valid Anthropic key accepted", True, reason)
-
-    # 4b. OpenAI key rejected
-    ok, reason = gate.validate("sk-openai-ABCDEF1234567890")
-    assert ok is False, "OpenAI key should be rejected"
-    assert "OpenAI" in reason, f"Reason should mention OpenAI: {reason}"
-    record("4b. Lockdown: OpenAI key rejected", True, reason)
-
-    # 4c. Empty key rejected
-    ok, reason = gate.validate("")
-    assert ok is False, "Empty key should be rejected"
-    record("4c. Lockdown: empty key rejected", True, reason)
-
-    # 4d. Claude model accepted
-    ok, reason = verifier.validate("claude-sonnet-4-20250514")
-    assert ok is True, f"Claude model should pass: {reason}"
-    record("4d. Lockdown: claude-sonnet-4 model accepted", True, reason)
-
-    # 4e. Claude 3.5 model accepted
-    ok, reason = verifier.validate("claude-3-5-sonnet-20241022")
-    assert ok is True, f"Claude 3.5 model should pass: {reason}"
-    record("4e. Lockdown: claude-3-5-sonnet accepted", True, reason)
-
-    # 4f. GPT-4 rejected
-    ok, reason = verifier.validate("gpt-4")
-    assert ok is False, "GPT-4 should be rejected"
-    assert "OpenAI" in reason, f"Reason should mention OpenAI: {reason}"
-    record("4f. Lockdown: gpt-4 model rejected", True, reason)
-
-    # 4g. Gemini rejected
-    ok, reason = verifier.validate("gemini-pro")
-    assert ok is False, "Gemini should be rejected"
-    assert "Google" in reason, f"Reason should mention Google: {reason}"
-    record("4g. Lockdown: gemini-pro rejected", True, reason)
-
-    # 4h. Random model rejected
-    ok, reason = verifier.validate("my-custom-model")
-    assert ok is False, "Unknown model should be rejected"
-    record("4h. Lockdown: unknown model rejected", True, reason)
-
-
-# ---------------------------------------------------------------------------
-# 5. Token Saver
+# 4. Token Saver
 # ---------------------------------------------------------------------------
 
 def test_token_saver(tmp_path: Path):
@@ -588,12 +531,6 @@ def test_personality():
     assert "python_basics" in celebration, "Celebration should mention the skill name"
     record("9e. Persona: absorption celebration", True, f"Got: {celebration[:50]}...")
 
-    # 9f. Lockdown refusal
-    refusal = persona.lockdown_refusal("openai")
-    assert isinstance(refusal, str), "Refusal should be a string"
-    assert "openai" in refusal.lower(), "Refusal should mention the provider"
-    record("9f. Persona: lockdown refusal", True, f"Got: {refusal[:50]}...")
-
 
 # ---------------------------------------------------------------------------
 # Main
@@ -622,12 +559,8 @@ def main():
         run_test("3. Audit Chain", lambda: test_audit_chain(tmp_dir))
         print()
 
-        print("--- 4. Lockdown Gate ---")
-        run_test("4. Lockdown Gate", test_lockdown_gate)
-        print()
-
-        print("--- 5. Token Saver ---")
-        run_test("5. Token Saver", lambda: test_token_saver(tmp_dir))
+        print("--- 4. Token Saver ---")
+        run_test("4. Token Saver", lambda: test_token_saver(tmp_dir))
         print()
 
         print("--- 6. Skill DAG ---")

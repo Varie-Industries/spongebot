@@ -15,11 +15,11 @@ SPONGEBOT_SPLASH = r"""
 """
 
 BUU_ASCII = r"""
-          .-""""""-.
+          .-~~~~~~-.
         .'          '.
        /   O      O   \
       :                :
-      |    \______/    |
+      |     ______     |
       :     .'  '.     ;
        \   /  BUU \   /
         './ \____/ \.'
@@ -57,7 +57,7 @@ BOOT_MESSAGES = [
     "Loading Skill DAG topology...",
     "Priming the learning tiers...",
     "Calibrating token compression layers...",
-    "Engaging Anthropic-only lockdown...",
+    "Connecting to Claude API...",
     "Warming up the chocolate beam...",
     "Inflating Buu's absorption antenna...",
 ]

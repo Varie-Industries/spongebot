@@ -92,7 +92,7 @@ class TestChainIntegrity:
         chain.append("system", "boot", "System boot")
         chain.append("security", "vault_init", "Vault initialized")
         chain.append("skill", "skill_added", "Added skill")
-        chain.append("lockdown", "scan", "Environment scan clean")
+        chain.append("system", "scan", "Environment scan clean")
 
         is_valid, reason = chain.verify_chain()
         assert is_valid is True

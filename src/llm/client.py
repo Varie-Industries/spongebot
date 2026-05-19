@@ -1,14 +1,10 @@
 """
-ClaudeClient -- Anthropic Claude API client with lockdown validation.
+ClaudeClient -- Anthropic Claude API client.
 
-ONLY provider.  Every call is validated by the lockdown subsystem (API key
-gate, model verifier, response fingerprint).  Token savings are applied
-through the token_saver subsystem.
-
-Absorbed from IT_NEXUS ``cortex.py`` ``ClaudeLLM`` class: config-driven
-construction, async boot/shutdown lifecycle, conversation history support,
-structured response extraction, and graceful fallback when API key is
-missing.
+Anthropic is the only supported provider. Token savings are applied through
+the token_saver subsystem. Config-driven construction, async boot/shutdown
+lifecycle, conversation history support, structured response extraction,
+and graceful fallback when no API key is configured.
 """
 
 from __future__ import annotations
@@ -23,12 +19,7 @@ logger = logging.getLogger("spongebot.llm.client")
 
 
 class ClaudeClient:
-    """Anthropic Claude API client -- ONLY provider.
-
-    Every call is validated by lockdown layers:
-    - Layer 1 (AnthropicGate): API key format check
-    - Layer 2 (ModelVerifier): model ID allowlist
-    - Layer 4 (ResponseFingerprint): structural response validation
+    """Anthropic Claude API client.
 
     Parameters
     ----------
@@ -38,8 +29,6 @@ class ClaudeClient:
         - ``max_tokens`` (default 4096)
         - ``temperature`` (default 0.7)
         - ``api_key`` (falls back to ``ANTHROPIC_API_KEY`` env var)
-    lockdown : Any | None
-        Optional lockdown subsystem for validation.
     token_saver : Any | None
         Optional token saver for prompt compression and caching.
     cost_tracker : Any | None
@@ -49,7 +38,6 @@ class ClaudeClient:
     def __init__(
         self,
         config: dict[str, Any],
-        lockdown: Any | None = None,
         token_saver: Any | None = None,
         cost_tracker: Any | None = None,
     ) -> None:
@@ -62,7 +50,6 @@ class ClaudeClient:
             llm_cfg.get("api_key", "") or os.environ.get("ANTHROPIC_API_KEY", "")
         )
 
-        self._lockdown = lockdown
         self._token_saver = token_saver
         self._cost_tracker = cost_tracker
 
@@ -81,28 +68,6 @@ class ClaudeClient:
 
     async def boot(self) -> None:
         """Validate API key and initialise the AsyncAnthropic client."""
-        # Lockdown Layer 1: validate API key format
-        if self._lockdown is not None and hasattr(self._lockdown, "validate_api_key"):
-            try:
-                passed, reason = self._lockdown.validate_api_key(self._api_key)
-                if not passed:
-                    logger.warning("Lockdown rejected API key: %s", reason)
-                    logger.warning("LLM client will operate in stub mode.")
-                    return
-            except Exception as exc:
-                logger.warning("Lockdown API key validation error: %s", exc)
-
-        # Lockdown Layer 2: validate model ID
-        if self._lockdown is not None and hasattr(self._lockdown, "validate_model"):
-            try:
-                passed, reason = self._lockdown.validate_model(self._model)
-                if not passed:
-                    logger.warning("Lockdown rejected model '%s': %s", self._model, reason)
-                    logger.warning("LLM client will operate in stub mode.")
-                    return
-            except Exception as exc:
-                logger.warning("Lockdown model validation error: %s", exc)
-
         if not self._api_key:
             logger.warning(
                 "No Anthropic API key configured. "
@@ -264,25 +229,6 @@ class ClaudeClient:
         self._total_input_tokens += input_tokens
         self._total_output_tokens += output_tokens
 
-        # -- Lockdown Layer 4: validate response fingerprint --
-        if self._lockdown is not None and hasattr(self._lockdown, "validate_response"):
-            try:
-                raw_response = {
-                    "content": [{"type": "text", "text": text}],
-                    "usage": {
-                        "input_tokens": input_tokens,
-                        "output_tokens": output_tokens,
-                    },
-                    "model": response.model,
-                    "stop_reason": stop_reason,
-                }
-                passed, reason = self._lockdown.validate_response(raw_response)
-                if not passed:
-                    logger.warning("Lockdown rejected response: %s", reason)
-                    # Still return the response but flag it
-            except Exception as exc:
-                logger.debug("Lockdown response validation error: %s", exc)
-
         # -- Token saver: cache response --
         if self._token_saver is not None and hasattr(self._token_saver, "cache_response"):
             try:
@@ -332,8 +278,8 @@ class ClaudeClient:
         if self._token_saver is not None and hasattr(self._token_saver, "compress_prompt"):
             try:
                 compressed_prompt = self._token_saver.compress_prompt(system_prompt)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Token saver compress_prompt failed: %s", exc)
 
         if self._client is None:
             yield self._fallback_text()
@@ -368,8 +314,8 @@ class ClaudeClient:
                 if self._token_saver is not None and hasattr(self._token_saver, "cache_response"):
                     try:
                         self._token_saver.cache_response(cache_key, full_text)
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        logger.debug("Token saver cache_response failed: %s", exc)
 
                 # Cost tracking
                 if self._cost_tracker is not None and hasattr(self._cost_tracker, "record_cost"):
@@ -379,8 +325,8 @@ class ClaudeClient:
                             input_tokens=input_tokens,
                             output_tokens=output_tokens,
                         )
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        logger.debug("Cost tracker record_cost failed: %s", exc)
 
         except Exception as exc:
             self._errors += 1
