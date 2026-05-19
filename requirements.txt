@@ -1,5 +1,8 @@
-# SpongeBot v0.2.0 - Simplified Absorption Engine
-# Anthropic Claude ONLY
+# SpongeBot v0.2.0
+# Absorption engine for Claude, exposed as an MCP server.
+
+# MCP server runtime
+mcp>=1.0
 
 # Core LLM
 anthropic>=0.40.0
