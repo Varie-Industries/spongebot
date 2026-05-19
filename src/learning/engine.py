@@ -345,8 +345,8 @@ class LearningEngine:
             try:
                 dag_stats = self._skill_dag.stats()
                 tier3_count = dag_stats.get("node_count", 0)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("SkillDAG stats unavailable: %s", exc)
 
         return {
             "tier1": {

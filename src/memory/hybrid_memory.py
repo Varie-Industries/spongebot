@@ -193,14 +193,15 @@ class HybridMemory:
         sqlite_ok = True
         try:
             self._sqlite.get_sessions(limit=1)
-        except Exception:
+        except Exception as exc:
+            logger.warning("SQLite health check failed: %s", exc)
             sqlite_ok = False
 
         locked_out = False
         try:
             locked_out = self._sqlite.is_locked_out()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("is_locked_out check failed: %s", exc)
 
         overall = "healthy" if sqlite_ok else "degraded"
         if locked_out:
