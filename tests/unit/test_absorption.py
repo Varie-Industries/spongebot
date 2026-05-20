@@ -15,8 +15,6 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-import asyncio
-
 import pytest
 
 from src.absorption.document_absorption import DocumentAbsorption
@@ -47,7 +45,7 @@ class TestDocumentAbsorption:
         """DocumentAbsorption instance with no LLM (uses deterministic path)."""
         return DocumentAbsorption(config=absorption_config, llm_client=None)
 
-    def test_document_absorption_extracts_skills(self, doc_absorber):
+    async def test_document_absorption_extracts_skills(self, doc_absorber):
         """absorb() with no LLM client must return an empty list (no extraction).
 
         Without an LLM client, DocumentAbsorption cannot extract skills
@@ -69,11 +67,8 @@ Configure logging with `logging.basicConfig(level=logging.DEBUG)`.
 
 Read stack traces bottom-up to find the root cause.
 """
-        result = asyncio.get_event_loop().run_until_complete(
-            doc_absorber.absorb(content, content_type="markdown", source_id="debug_guide.md")
-        )
+        result = await doc_absorber.absorb(content, content_type="markdown", source_id="debug_guide.md")
 
-        # Without LLM, no skills are extracted but the method completes cleanly
         assert isinstance(result, list)
 
     def test_document_absorption_chunking(self, doc_absorber):
@@ -92,18 +87,14 @@ Read stack traces bottom-up to find the root cause.
         assert "Hello" in cleaned
         assert "world" in cleaned
 
-    def test_document_absorption_empty_content(self, doc_absorber):
+    async def test_document_absorption_empty_content(self, doc_absorber):
         """absorb() with empty content must return an empty list."""
-        result = asyncio.get_event_loop().run_until_complete(
-            doc_absorber.absorb("", content_type="text")
-        )
+        result = await doc_absorber.absorb("", content_type="text")
         assert result == []
 
-    def test_document_absorption_unsupported_type_falls_back(self, doc_absorber):
+    async def test_document_absorption_unsupported_type_falls_back(self, doc_absorber):
         """An unsupported content_type must fall back to 'text' without error."""
-        result = asyncio.get_event_loop().run_until_complete(
-            doc_absorber.absorb("Some content here.", content_type="docx")
-        )
+        result = await doc_absorber.absorb("Some content here.", content_type="docx")
         assert isinstance(result, list)
 
 
@@ -114,7 +105,7 @@ class TestExperienceAbsorption:
         """ExperienceAbsorption with no LLM (deterministic distillation)."""
         return ExperienceAbsorption(config=absorption_config, llm_client=None)
 
-    def test_experience_absorption_captures_trajectory(self, exp_absorber):
+    async def test_experience_absorption_captures_trajectory(self, exp_absorber):
         """absorb() with a valid trajectory must produce skill dicts."""
         trajectory = [
             {"tool": "read_file", "input": {"path": "config.json"}, "output": {"content": "{}"}},
@@ -122,25 +113,20 @@ class TestExperienceAbsorption:
             {"tool": "write_file", "input": {"path": "out.json"}, "output": {"success": True}},
         ]
 
-        result = asyncio.get_event_loop().run_until_complete(
-            exp_absorber.absorb(trajectory, source_id="config_task")
-        )
+        result = await exp_absorber.absorb(trajectory, source_id="config_task")
 
         assert isinstance(result, list)
         assert len(result) >= 1
 
-        # Check the main skill structure
         skill = result[0]
         assert "name" in skill
         assert "steps" in skill
         assert "confidence" in skill
         assert skill["absorption_mode"] == "experience"
 
-    def test_experience_absorption_empty_trajectory(self, exp_absorber):
+    async def test_experience_absorption_empty_trajectory(self, exp_absorber):
         """absorb() with an empty trajectory must return an empty list."""
-        result = asyncio.get_event_loop().run_until_complete(
-            exp_absorber.absorb([], source_id="empty")
-        )
+        result = await exp_absorber.absorb([], source_id="empty")
         assert result == []
 
     def test_experience_absorption_deterministic_distill(self, exp_absorber):
@@ -159,7 +145,7 @@ class TestExperienceAbsorption:
         """Steps without 'tool' key must be filtered out during validation."""
         trajectory = [
             {"tool": "valid_tool", "input": {}, "output": {}},
-            {"no_tool_key": True},  # invalid
+            {"no_tool_key": True},
             {"tool": "another_tool", "input": {}, "output": {}},
         ]
 
@@ -178,19 +164,17 @@ class TestFailureAbsorption:
             skill_dag=None,
         )
 
-    def test_failure_absorption_creates_anti_skills(self, fail_absorber):
+    async def test_failure_absorption_creates_anti_skills(self, fail_absorber):
         """absorb() with a failed trajectory must create anti-skill dicts."""
         trajectory = [
             {"tool": "deploy_app", "input": {"env": "prod"}, "output": {"error": "Permission denied"}},
         ]
         error_info = "Deployment failed: Permission denied on production server"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            fail_absorber.absorb(
-                trajectory,
-                error_info=error_info,
-                source_id="deploy_failure",
-            )
+        result = await fail_absorber.absorb(
+            trajectory,
+            error_info=error_info,
+            source_id="deploy_failure",
         )
 
         assert isinstance(result, list)
@@ -201,13 +185,11 @@ class TestFailureAbsorption:
         assert "name" in anti_skill
         assert anti_skill["name"].startswith("avoid_")
         assert anti_skill["absorption_mode"] == "failure"
-        assert anti_skill["confidence"] == 0.7  # failure initial confidence
+        assert anti_skill["confidence"] == 0.7
 
-    def test_failure_absorption_empty_trajectory_and_error(self, fail_absorber):
+    async def test_failure_absorption_empty_trajectory_and_error(self, fail_absorber):
         """absorb() with empty trajectory AND no error info returns empty list."""
-        result = asyncio.get_event_loop().run_until_complete(
-            fail_absorber.absorb([], error_info="")
-        )
+        result = await fail_absorber.absorb([], error_info="")
         assert result == []
 
     def test_failure_absorption_deterministic_analyse(self):
@@ -224,15 +206,13 @@ class TestFailureAbsorption:
         assert "failure" in analysis["tags"]
         assert len(analysis["avoidance_steps"]) > 0
 
-    def test_failure_absorption_increments_count(self, fail_absorber):
+    async def test_failure_absorption_increments_count(self, fail_absorber):
         """Each absorb call must increment the internal failure counter."""
         assert fail_absorber._failure_count == 0
 
-        asyncio.get_event_loop().run_until_complete(
-            fail_absorber.absorb(
-                [{"tool": "x", "input": {}, "output": {}}],
-                error_info="fail",
-            )
+        await fail_absorber.absorb(
+            [{"tool": "x", "input": {}, "output": {}}],
+            error_info="fail",
         )
 
         assert fail_absorber._failure_count == 1

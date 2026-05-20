@@ -49,7 +49,7 @@ def run_test(subsystem: str, fn):
 def run_async_test(subsystem: str, coro_fn):
     """Run an async test function via asyncio."""
     try:
-        asyncio.get_event_loop().run_until_complete(coro_fn())
+        asyncio.run(coro_fn())
     except Exception as exc:
         record(subsystem, False, f"Exception: {exc}\n{traceback.format_exc()}")
 
@@ -451,7 +451,7 @@ def test_learning_engine():
         # Shutdown
         await engine.shutdown()
 
-    asyncio.get_event_loop().run_until_complete(_run())
+    asyncio.run(_run())
 
 
 # ---------------------------------------------------------------------------
