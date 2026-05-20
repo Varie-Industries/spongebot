@@ -187,5 +187,3 @@ Tests live under `tests/{unit,integration,e2e}` with `conftest.py` for shared fi
 Proprietary. See [LICENSE](LICENSE). For commercial licensing, contact VARIE Industries.
 
 ---
-
-Built by [VARIE Industries](https://varieindustries.com).
