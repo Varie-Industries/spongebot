@@ -59,7 +59,7 @@ def run_async_test(subsystem: str, coro_fn):
 # ---------------------------------------------------------------------------
 
 def test_config_system():
-    from src.core.config import load_config, get_config, reset_config, DEFAULT_CONFIG
+    from src.core.config import get_config, load_config, reset_config
 
     # Reset singleton to avoid cross-test contamination
     reset_config()
@@ -171,7 +171,7 @@ def test_audit_chain(tmp_path: Path):
     assert e2.sequence == 1, f"Second entry should be seq 1, got {e2.sequence}"
     assert e2.prev_hash == e1.entry_hash, "Second entry prev_hash should match first entry_hash"
 
-    e3 = chain.append("system", "boot_complete", "Subsystems initialised")
+    chain.append("system", "boot_complete", "Subsystems initialised")
     assert chain.length == 3, f"Chain should have 3 entries, got {chain.length}"
 
     record("3a. Audit chain append", True, f"{chain.length} entries added with correct linking")
@@ -288,8 +288,8 @@ def test_token_saver(tmp_path: Path):
 # ---------------------------------------------------------------------------
 
 def test_skill_dag(tmp_path: Path):
+
     from src.skills.dag import SkillDAG, SkillNode
-    import networkx as nx
 
     dag_path = tmp_path / "skill_dag_test" / "skill_dag.json"
     config = {
@@ -437,8 +437,8 @@ def test_learning_engine():
 
         # 7c. Verify tier stats
         stats = await engine.get_tier_stats()
-        assert stats["tier1"]["interaction_count"] >= 3, f"Tier 1 should have 3+ interactions"
-        assert stats["tier2"]["pattern_count"] >= 1, f"Tier 2 should have 1+ patterns"
+        assert stats["tier1"]["interaction_count"] >= 3, "Tier 1 should have 3+ interactions"
+        assert stats["tier2"]["pattern_count"] >= 1, "Tier 2 should have 1+ patterns"
         record("7c. LearningEngine tier stats", True,
                f"T1 interactions={stats['tier1']['interaction_count']}, T2 patterns={stats['tier2']['pattern_count']}")
 
@@ -459,7 +459,7 @@ def test_learning_engine():
 # ---------------------------------------------------------------------------
 
 def test_cli_splash():
-    from src.cli.splash import SPONGEBOT_SPLASH, BUU_ASCII, random_buu_quote, BUU_QUOTES
+    from src.cli.splash import BUU_ASCII, BUU_QUOTES, SPONGEBOT_SPLASH, random_buu_quote
 
     # 8a. SPONGEBOT_SPLASH is non-empty string
     assert isinstance(SPONGEBOT_SPLASH, str), f"SPONGEBOT_SPLASH should be str, got {type(SPONGEBOT_SPLASH)}"
