@@ -305,7 +305,7 @@ class SelfDestruct:
                 f.write(f"SELF-DESTRUCT LOG - {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}\n")
                 f.write(f"{'='*60}\n")
                 f.write(log_content)
-                f.write(f"\n\nDestruction Report:\n")
+                f.write("\n\nDestruction Report:\n")
                 for key, items in report.items():
                     f.write(f"  {key}: {len(items)} items\n")
                     for item in items:

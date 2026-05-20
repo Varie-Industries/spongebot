@@ -7,7 +7,7 @@ The implementation details in _engine.py are compiled to binary for distribution
 
 from __future__ import annotations
 
-from src.token_saver._interface import TokenSaverInterface
 from src.token_saver._engine import TokenSaver
+from src.token_saver._interface import TokenSaverInterface
 
 __all__ = ["TokenSaverInterface", "TokenSaver"]

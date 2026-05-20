@@ -21,23 +21,21 @@ Built by VARIE Industries.
 """
 
 import asyncio
-import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from mcp.types import TextContent, Tool
 
 # Ensure SpongeBot src is importable
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.learning.engine import LearningEngine
 from src.memory.hybrid_memory import HybridMemory
 from src.skills.dag import SkillDAG, SkillNode
-from src.learning.engine import LearningEngine
 
 logger = logging.getLogger("spongebot.mcp")
 
@@ -256,7 +254,7 @@ class SpongeBotMCP:
             f"Memory: {mem_health['status']} | mode: {mem_health.get('mode', 'unknown')} | entries: {mem_health.get('text_entries', 0)}",
             f"Skills: {dag_stats['node_count']} skills | {dag_stats['edge_count']} edges | avg conf: {dag_stats['avg_confidence']:.2f}",
             f"Learning: {learn_stats.get('tier1', {}).get('count', 0)} tier-1 entries | 3-tier engine active",
-            f"Vault: AES-256 Fernet encryption available",
+            "Vault: AES-256 Fernet encryption available",
         ]
         return [TextContent(type="text", text="\n".join(lines))]
 

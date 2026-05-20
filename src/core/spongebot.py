@@ -25,15 +25,14 @@ Usage:
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
-from src.core.config import load_config, DEFAULT_CONFIG, _deep_merge
+from src.core.config import DEFAULT_CONFIG, _deep_merge, load_config
 
 logger = logging.getLogger("spongebot.core")
 
@@ -79,7 +78,7 @@ class SubsystemStatus:
     booted: bool = False
     healthy: bool = False
     boot_time_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     is_stub: bool = False
 
 
@@ -167,7 +166,7 @@ class _StubTokenSaver:
         """Compress prompt text. Stub returns as-is."""
         return text
 
-    def check_cache(self, prompt_hash: str) -> Optional[str]:
+    def check_cache(self, prompt_hash: str) -> str | None:
         entry = self._cache.get(prompt_hash)
         if entry and (time.time() - entry[1]) < self._ttl:
             return entry[0]

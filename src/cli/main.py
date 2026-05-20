@@ -2,27 +2,24 @@
 
 import random
 import time
-from typing import Optional
 
 import click
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 from rich.text import Text
 
 from src.cli.splash import (
-    SPONGEBOT_SPLASH,
-    BUU_ASCII,
     BOOT_MESSAGES,
+    BUU_ASCII,
+    SPONGEBOT_SPLASH,
     random_buu_quote,
     random_celebration,
 )
 from src.cli.themes import (
     RICH_THEME,
     STYLES,
-    STATUS_ICONS,
-    tier_label,
     status_dot,
 )
 
@@ -282,12 +279,12 @@ def _absorb_preview(
 
 @cli.command()
 @click.option("--tier", type=int, default=None, help="Filter by tier (0-5).")
-def skills(tier: Optional[int]) -> None:
+def skills(tier: int | None) -> None:
     """List all absorbed skills in the DAG."""
     _show_skills_table(tier_filter=tier)
 
 
-def _show_skills_table(tier_filter: Optional[int] = None) -> None:
+def _show_skills_table(tier_filter: int | None = None) -> None:
     """Render the skills table."""
     table = Table(
         title="Absorbed Skills",

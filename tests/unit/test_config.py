@@ -1,4 +1,5 @@
 from pathlib import Path
+
 """
 Unit tests for src.core.config -- SpongeBot configuration system.
 
@@ -77,4 +78,4 @@ class TestLoadConfig:
 
         original = copy.deepcopy(DEFAULT_CONFIG)
         load_config()
-        assert DEFAULT_CONFIG == original
+        assert original == DEFAULT_CONFIG

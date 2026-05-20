@@ -1,4 +1,5 @@
 from pathlib import Path
+
 """
 Unit tests for src.absorption submodules -- document, experience, failure.
 

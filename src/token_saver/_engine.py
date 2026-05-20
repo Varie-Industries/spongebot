@@ -29,9 +29,9 @@ import threading
 import time
 import zlib
 from collections import OrderedDict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("spongebot.token_saver")
 
@@ -101,7 +101,7 @@ class ResponseCache:
         normalized = cls._NAME_PAT.sub("<NAME>", normalized)
         return cls._sha(normalized)
 
-    def check(self, user_message: str) -> Optional[str]:
+    def check(self, user_message: str) -> str | None:
         now = time.time()
         exact_key = self._sha(user_message)
         pattern_key = self._pattern_key(user_message)
@@ -202,7 +202,7 @@ class AgenticPlanCache:
         normalized = self._normalize(skeleton)
         return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
-    def check(self, plan_request: dict) -> Optional[dict]:
+    def check(self, plan_request: dict) -> dict | None:
         """Check if a structurally similar plan exists in cache.
 
         Args:
@@ -548,7 +548,7 @@ class SemanticCache:
 
     def check(
         self, query: str, threshold: float | None = None
-    ) -> Optional[str]:
+    ) -> str | None:
         """Check for a semantically similar cached query.
 
         Args:
@@ -570,7 +570,7 @@ class SemanticCache:
 
         now = time.time()
         best_score = 0.0
-        best_response: Optional[str] = None
+        best_response: str | None = None
 
         with self._lock:
             # Evict expired entries
@@ -1013,7 +1013,7 @@ class TokenSaver:
 
     # --- L2: Response Cache ---
 
-    def check_cache(self, message: str) -> Optional[str]:
+    def check_cache(self, message: str) -> str | None:
         """L2: SHA-256 exact match + pattern match cache lookup.
 
         Returns:
@@ -1033,7 +1033,7 @@ class TokenSaver:
 
     # --- L3: Agentic Plan Cache ---
 
-    def check_plan_cache(self, plan_request: dict) -> Optional[dict]:
+    def check_plan_cache(self, plan_request: dict) -> dict | None:
         """L3: Check for a structurally similar cached plan.
 
         Returns:
@@ -1083,7 +1083,7 @@ class TokenSaver:
 
     def check_semantic_cache(
         self, query: str, threshold: float = 0.92
-    ) -> Optional[str]:
+    ) -> str | None:
         """L6: Embedding-similarity cache lookup.
 
         Falls back to L2 exact cache if embeddings are unavailable.

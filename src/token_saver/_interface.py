@@ -5,7 +5,7 @@ Only this Protocol class is public. The implementation is compiled to binary.
 
 from __future__ import annotations
 
-from typing import Optional, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -30,7 +30,7 @@ class TokenSaverInterface(Protocol):
         """L1: Strip whitespace bloat, formatting decorators, triple newlines."""
         ...
 
-    def check_cache(self, message: str) -> Optional[str]:
+    def check_cache(self, message: str) -> str | None:
         """L2: SHA-256 exact match + pattern match cache lookup."""
         ...
 
@@ -48,7 +48,7 @@ class TokenSaverInterface(Protocol):
 
     def check_semantic_cache(
         self, query: str, threshold: float = 0.92
-    ) -> Optional[str]:
+    ) -> str | None:
         """L6: Embedding-similarity cache lookup for near-identical queries."""
         ...
 

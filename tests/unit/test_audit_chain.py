@@ -1,4 +1,5 @@
 from pathlib import Path
+
 """
 Unit tests for src.security.audit_chain -- tamper-evident SHA-256 audit chain.
 
@@ -15,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import pytest
 
-from src.security.audit_chain import AuditChain, AuditEntry
+from src.security.audit_chain import AuditChain
 
 
 @pytest.fixture

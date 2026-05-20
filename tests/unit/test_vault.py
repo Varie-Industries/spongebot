@@ -1,4 +1,5 @@
 from pathlib import Path
+
 """
 Unit tests for src.security.vault_core -- AES-256 Fernet vault.
 

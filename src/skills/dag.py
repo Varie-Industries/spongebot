@@ -596,7 +596,7 @@ class SkillDAG:
             return
 
         try:
-            with open(self._persist_path, "r") as fh:
+            with open(self._persist_path) as fh:
                 payload = json.load(fh)
         except (OSError, json.JSONDecodeError) as exc:
             logger.error("Failed to load DAG from %s: %s -- starting fresh.", self._persist_path, exc)

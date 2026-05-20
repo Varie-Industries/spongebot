@@ -1,4 +1,5 @@
 from pathlib import Path
+
 """
 Unit tests for src.skills.dag -- networkx-based Skill DAG.
 

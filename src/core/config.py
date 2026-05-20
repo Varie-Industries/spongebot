@@ -327,7 +327,7 @@ def load_config(
                 config_path,
             )
         else:
-            with open(config_path, "r") as fh:
+            with open(config_path) as fh:
                 user_config = yaml.safe_load(fh) or {}
             config = _deep_merge(config, user_config)
             logger.info("Loaded config from %s", config_path)

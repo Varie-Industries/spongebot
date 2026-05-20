@@ -10,10 +10,10 @@ Absorbed from IT_NEXUS SecurityCore patterns:
 
 from __future__ import annotations
 
-from .vault_core import VaultCore, VaultError
-from .audit_chain import AuditEntry, AuditChain
-from .memguard import MemGuard, SignatureRequest, MemGuardError
+from .audit_chain import AuditChain, AuditEntry
+from .memguard import MemGuard, MemGuardError, SignatureRequest
 from .self_destruct import SelfDestruct, SelfDestructError
+from .vault_core import VaultCore, VaultError
 
 __all__ = [
     "VaultCore",

@@ -254,7 +254,7 @@ class MemGuard:
                 )
 
             # Compute HMAC signature
-            sign_data = f"{request_id}{request.payload_hash}".encode("utf-8")
+            sign_data = f"{request_id}{request.payload_hash}".encode()
             signature = hmac.new(
                 self._shared_secret, sign_data, hashlib.sha256
             ).hexdigest()
@@ -335,7 +335,7 @@ class MemGuard:
                 # Verify all HMAC signatures
                 for signer, sig in request.signatures.items():
                     sign_data = (
-                        f"{request_id}{request.payload_hash}".encode("utf-8")
+                        f"{request_id}{request.payload_hash}".encode()
                     )
                     expected = hmac.new(
                         self._shared_secret, sign_data, hashlib.sha256

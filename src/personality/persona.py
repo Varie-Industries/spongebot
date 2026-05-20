@@ -1,7 +1,5 @@
 """SpongeBotPersona -- builds system prompts and flavors responses."""
 
-import random
-from typing import Optional
 
 from src.cli.splash import (
     random_celebration,
